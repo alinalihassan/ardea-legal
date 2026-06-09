@@ -25,12 +25,24 @@ Inquiries POST to `/api/inquiry`. Set `INQUIRY_WEBHOOK_URL` to forward submissio
 
 Without a webhook, the API still validates and returns success in development; wire up delivery before production launch.
 
-## Production
+## Deploy on Vercel
+
+This project uses the [`@astrojs/vercel`](https://docs.astro.build/en/guides/integrations-guide/vercel/) adapter (SSR + `/api/inquiry`).
+
+1. Push the repo to GitHub and import it in Vercel, or run `vercel` from the project root.
+2. Vercel should auto-detect **Astro** with:
+   - **Build command:** `npm run build`
+   - **Output:** handled by the adapter (do not set Output Directory to `dist` manually)
+3. Redeploy after pulling the Vercel adapter change. A 404 usually means the old `@astrojs/node` standalone build was deployed, which Vercel cannot serve.
+
+Optional env var in the Vercel dashboard:
+
+- `INQUIRY_WEBHOOK_URL` — forwards form submissions to your email/CRM webhook
+
+## Production (local)
 
 ```bash
 npm run build
-node ./dist/server/entry.mjs
+npm run preview
 ```
-
-Deploy with any Node-compatible host (Railway, Render, Fly.io) or adapt the Astro adapter for Vercel/Netlify.
 
