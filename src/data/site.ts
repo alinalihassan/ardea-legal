@@ -28,8 +28,7 @@ export const site = {
     matterRequired: "Beschrijf uw zaak kort.",
     matterTooShort: "Voeg iets meer detail toe.",
     submitError: "Er ging iets mis. Probeer het opnieuw of mail direct.",
-    submitSuccess:
-      "Aanvraag ontvangen. We reageren binnen twee werkdagen.",
+    submitSuccess: "Aanvraag ontvangen.",
     apiInvalidRequest: "Ongeldige aanvraag.",
     apiNameRequired: "Naam is verplicht.",
     apiEmailInvalid: "Een geldig e-mailadres is verplicht.",

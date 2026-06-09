@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { site } from "../../data/site";
+import { isMailConfigured, sendInquiryEmail } from "../../lib/mail";
 
 export const prerender = false;
 
@@ -24,6 +25,16 @@ function validate(payload: InquiryPayload) {
   return { ok: true as const, name, email, matter };
 }
 
+function deliveryFailedResponse() {
+  return new Response(
+    JSON.stringify({
+      ok: false,
+      message: site.messages.apiDeliveryFailed.replace("{email}", site.email),
+    }),
+    { status: 502, headers: { "Content-Type": "application/json" } },
+  );
+}
+
 export const POST: APIRoute = async ({ request }) => {
   let payload: InquiryPayload;
 
@@ -44,38 +55,23 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const webhook = import.meta.env.INQUIRY_WEBHOOK_URL;
-
-  if (webhook) {
-    try {
-      await fetch(webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: result.name,
-          email: result.email,
-          matter: result.matter,
-          source: "ardea-legal-website",
-        }),
+  if (!isMailConfigured()) {
+    if (import.meta.env.DEV) {
+      console.info("[inquiry] mail not configured", {
+        name: result.name,
+        email: result.email,
+        matterLength: result.matter.length,
       });
-    } catch {
-      return new Response(
-        JSON.stringify({
-          ok: false,
-          message: site.messages.apiDeliveryFailed.replace(
-            "{email}",
-            site.email,
-          ),
-        }),
-        { status: 502, headers: { "Content-Type": "application/json" } },
-      );
+    } else {
+      return deliveryFailedResponse();
     }
-  } else if (import.meta.env.PROD) {
-    console.info("[inquiry]", {
-      name: result.name,
-      email: result.email,
-      matterLength: result.matter.length,
-    });
+  } else {
+    try {
+      await sendInquiryEmail(result);
+    } catch (error) {
+      console.error("[inquiry] send failed", error);
+      return deliveryFailedResponse();
+    }
   }
 
   return new Response(
