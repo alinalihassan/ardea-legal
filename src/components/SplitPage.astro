@@ -1,5 +1,6 @@
 ---
 import { site } from "../data/site";
+import logo from "../assets/logo_greyscale.png";
 ---
 
 <a class="skip-link" href="#inquiry-form">{site.form.skipLink}</a>
@@ -18,7 +19,15 @@ import { site } from "../data/site";
 
   <main class="split__form-panel" id="main">
     <div class="split__inner">
-      <header>
+      <header class="split__header">
+        <img
+          class="split__logo"
+          src={logo.src}
+          width={936}
+          height={1300}
+          alt={site.name}
+          decoding="async"
+        />
         <h1 class="split__brand">{site.name}</h1>
         <p class="split__tagline">{site.tagline}</p>
       </header>
