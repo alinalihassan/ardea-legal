@@ -1,0 +1,204 @@
+---
+import { site } from "../data/site";
+---
+
+<a class="skip-link" href="#inquiry-form">{site.form.skipLink}</a>
+
+<div class="split">
+  <div class="split__photo" aria-hidden="true">
+    <img
+      src={site.portrait.src}
+      data-fallback={site.portrait.fallback}
+      alt=""
+      width="1200"
+      height="1500"
+      decoding="async"
+    />
+  </div>
+
+  <main class="split__form-panel" id="main">
+    <div class="split__inner">
+      <header>
+        <h1 class="split__brand">{site.name}</h1>
+        <p class="split__tagline">{site.tagline}</p>
+      </header>
+
+      <form class="form" id="inquiry-form" novalidate>
+        <div class="form__field">
+          <label class="form__label" for="name">{site.form.nameLabel}</label>
+          <input
+            class="form__input"
+            type="text"
+            id="name"
+            name="name"
+            autocomplete="name"
+            required
+            aria-describedby="name-error"
+          />
+          <span class="form__error" id="name-error" role="alert"></span>
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="email">{site.form.emailLabel}</label>
+          <input
+            class="form__input"
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
+            inputmode="email"
+            required
+            aria-describedby="email-error"
+          />
+          <span class="form__error" id="email-error" role="alert"></span>
+        </div>
+
+        <div class="form__field">
+          <label class="form__label" for="matter">{site.form.matterLabel}</label>
+          <textarea
+            class="form__textarea"
+            id="matter"
+            name="matter"
+            required
+            minlength="20"
+            aria-describedby="matter-error"
+            placeholder={site.form.matterPlaceholder}
+          ></textarea>
+          <span class="form__error" id="matter-error" role="alert"></span>
+        </div>
+
+        <button class="btn btn--primary" type="submit" id="submit-btn">
+          {site.form.submit}
+        </button>
+
+        <div
+          class="form__status form__status--success"
+          id="form-success"
+          role="status"
+          hidden
+        ></div>
+        <div
+          class="form__status form__status--error"
+          id="form-error"
+          role="alert"
+          hidden
+        ></div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ messages: site.messages, form: site.form }}>
+  const portrait = document.querySelector(".split__photo img");
+  if (portrait) {
+    portrait.addEventListener("error", () => {
+      const fallback = portrait.dataset.fallback;
+      if (fallback && portrait.src !== fallback) portrait.src = fallback;
+    });
+  }
+
+  const formEl = document.getElementById("inquiry-form");
+  const submitBtn = document.getElementById("submit-btn");
+  const successEl = document.getElementById("form-success");
+  const errorEl = document.getElementById("form-error");
+
+  const fields = {
+    name: {
+      input: document.getElementById("name"),
+      error: document.getElementById("name-error"),
+    },
+    email: {
+      input: document.getElementById("email"),
+      error: document.getElementById("email-error"),
+    },
+    matter: {
+      input: document.getElementById("matter"),
+      error: document.getElementById("matter-error"),
+    },
+  };
+
+  function validateEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function setFieldError(field, message) {
+    fields[field].input.setAttribute("aria-invalid", message ? "true" : "false");
+    fields[field].error.textContent = message;
+  }
+
+  function validateField(field) {
+    const value = fields[field].input.value.trim();
+
+    if (field === "name") {
+      if (!value) return setFieldError("name", messages.nameRequired), false;
+      setFieldError("name", "");
+      return true;
+    }
+
+    if (field === "email") {
+      if (!value) return setFieldError("email", messages.emailRequired), false;
+      if (!validateEmail(value))
+        return setFieldError("email", messages.emailInvalid), false;
+      setFieldError("email", "");
+      return true;
+    }
+
+    if (!value) return setFieldError("matter", messages.matterRequired), false;
+    if (value.length < 20)
+      return setFieldError("matter", messages.matterTooShort), false;
+    setFieldError("matter", "");
+    return true;
+  }
+
+  for (const key of Object.keys(fields)) {
+    fields[key].input.addEventListener("blur", () => validateField(key));
+  }
+
+  formEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    successEl.hidden = true;
+    errorEl.hidden = true;
+
+    const valid = ["name", "email", "matter"].every(validateField);
+
+    if (!valid) {
+      const firstInvalid = Object.keys(fields).find(
+        (field) => fields[field].input.getAttribute("aria-invalid") === "true",
+      );
+      if (firstInvalid) fields[firstInvalid].input.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = form.submitting;
+
+    try {
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fields.name.input.value.trim(),
+          email: fields.email.input.value.trim(),
+          matter: fields.matter.input.value.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message ?? messages.submitError);
+      }
+
+      formEl.reset();
+      successEl.textContent = data.message ?? messages.submitSuccess;
+      successEl.hidden = false;
+    } catch (error) {
+      errorEl.textContent =
+        error instanceof Error ? error.message : messages.submitError;
+      errorEl.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = form.submit;
+    }
+  });
+</script>
