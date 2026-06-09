@@ -1,16 +1,39 @@
 export const site = {
   name: "Ardea Legal",
   legalName: "Ardea Legal",
-  title: "Ardea Legal — Freelance advocaat",
+  title: "Ardea Legal — Freelance jurist",
   description:
-    "Freelance advocaat in Nederland. Algemene juridische zaken voor particulieren en mkb. Duidelijk advies, eenvoudig contact.",
+    "Freelance jurist in Nederland. Algemene juridische zaken voor particulieren en mkb. Duidelijk advies, eenvoudig contact.",
+  keywords: [
+    "Ardea Legal",
+    "freelance jurist",
+    "Jurist Nederland",
+    "juridisch advies",
+    "contracten voor particulieren",
+    "Jurist AI",
+    "juridische hulp",
+    "contracten",
+    "arbeidsrecht",
+    "AI contract checken",
+    "Contract checken Amsterdam",
+    "Contract checken Nederland",
+    "Auteursrechtovereenkomst",
+    "Muziek jurist",
+    "Muziekrecht",
+    "ChatGPT contract checken",
+    "IP jurist",
+    "Plagiaat jurist",
+    "ChatGPT contract checken",
+    "Contract controleren",
+
+  ],
   tagline: "Juridische zaken, helder afgehandeld.",
   email: "berend@ArdeaLegal.nl",
   portrait: {
     src: "/images/portrait.jpg",
     fallback:
       "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1200&q=80",
-    alt: "Ardea Legal, freelance advocaat",
+    alt: "Ardea Legal, freelance jurist",
   },
   form: {
     skipLink: "Ga naar het formulier",
